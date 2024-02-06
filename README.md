@@ -2,10 +2,12 @@
 
 Locker is an **independent** project focused on **educational purposes**. Its main goal is to be **fast and easy to compile and use**. The code was written in Golang, using libraries to map and identify other storage partitions and network folders automatically mounted on the machine. The system uses **goroutines** and threads to facilitate **time management** in situations with **multiple files**, in addition to using modern CBC encryption, known as **ChaCha20**.
 
-![aa](https://github.com/Redshifteye/Eiffel/assets/109265897/64c0b7e6-2258-4a94-bae0-97bac901ed5c)
 
 
-https://github.com/Redshifteye/Eiffel/assets/109265897/fd0182dd-6eb4-4e5c-afe5-4e098ae178fe
+https://github.com/Redshifteye/Eiffel/assets/109265897/baddf75e-e076-4e93-9d90-a3ad91c3760e
+
+![aa](https://github.com/Redshifteye/Eiffel/assets/109265897/1b79bbe1-8390-4aa7-aa3f-bd3da51e6720)
+
 
 
 ### Disclaimer:
