@@ -6,8 +6,12 @@ Locker is an **independent** project focused on **educational purposes**. Its ma
 
 https://github.com/Redshifteye/Eiffel/assets/109265897/baddf75e-e076-4e93-9d90-a3ad91c3760e
 
+
+## Windows environment (.exe file)
 ![aa](https://github.com/Redshifteye/Eiffel/assets/109265897/1b79bbe1-8390-4aa7-aa3f-bd3da51e6720)
 
+## Linux environment (elf file)
+![bb](https://github.com/Europha/Eiffel/blob/673fcb0e123b7609fd0aae03b2e29441f96f5cde/image.png)
 
 
 ### Disclaimer:
